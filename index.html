@@ -51,9 +51,14 @@
         </div>
 
         <div class="flex items-center space-x-2 sm:space-x-3">
-          <button id="btn-supabase-status" onclick="openModal('settings-modal')" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100 transition-colors">
-            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
-            <span id="txt-supabase-status">Modo Local (Offline)</span>
+          <button id="btn-db-status" onclick="openModal('settings-modal')" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100 transition-colors">
+            <span id="dot-db-status" class="w-2 h-2 rounded-full bg-amber-500"></span>
+            <span id="txt-db-status">Cloudflare D1 / Local</span>
+          </button>
+
+          <button onclick="openModal('sql-modal')" class="hidden md:flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg border border-slate-300 transition-colors">
+            <i data-lucide="database" class="w-3.5 h-3.5 text-amber-600"></i>
+            <span>Script SQL Cloudflare D1</span>
           </button>
 
           <button onclick="openModal('csv-modal')" class="flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold text-cyan-700 bg-cyan-50 hover:bg-cyan-100 rounded-lg border border-cyan-200 transition-colors">
@@ -363,28 +368,103 @@
     </div>
   </div>
 
-  <!-- MODAL: CONFIGURAÇÕES E SUPABASE -->
+  <!-- MODAL: BANCO DE DADOS & CLOUDFLARE D1 -->
   <div id="settings-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs no-print">
     <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-xl max-h-[92vh] overflow-y-auto">
       <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50 rounded-t-2xl">
-        <h3 class="text-base font-bold text-slate-900">Configuração Supabase</h3>
+        <div class="flex items-center space-x-2">
+          <i data-lucide="database" class="w-5 h-5 text-amber-600"></i>
+          <h3 class="text-base font-bold text-slate-900">Banco de Dados Cloudflare D1</h3>
+        </div>
         <button onclick="closeModal('settings-modal')" class="p-1 text-slate-400 hover:text-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <div class="p-5 space-y-4 text-sm">
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Supabase URL</label>
-          <input type="text" id="supabase-url" placeholder="https://xyz.supabase.co" class="w-full py-2 px-3 border border-slate-300 rounded-lg text-xs font-mono">
+        <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 space-y-1">
+          <p class="font-bold">O Cloudflare D1 é o banco SQL nativo da própria Cloudflare!</p>
+          <p class="text-slate-700">Ele não requer chaves públicas no frontend. O Cloudflare Pages conecta automaticamente através de <code class="font-mono font-bold text-amber-900">/api/devices</code>.</p>
         </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-1">Supabase Anon Key</label>
-          <input type="password" id="supabase-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5c..." class="w-full py-2 px-3 border border-slate-300 rounded-lg text-xs font-mono">
-        </div>
-        <div id="supabase-test-feedback" class="text-xs hidden p-2.5 rounded-lg"></div>
 
-        <div class="flex items-center justify-between pt-3 border-t border-slate-200">
-          <button onclick="testSupabase()" class="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg border">Testar Conexão</button>
-          <button onclick="saveSupabaseConfig()" class="px-4 py-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg">Salvar Credenciais</button>
+        <div class="space-y-2 text-xs text-slate-700">
+          <span class="font-bold text-slate-900 block">Passos rápidos na Cloudflare:</span>
+          <ol class="list-decimal pl-5 space-y-1">
+            <li>Crie o banco em <strong>Storage &amp; Databases &gt; D1 SQL Database &gt; Create database</strong> (nome: <strong>pmoc-db</strong>).</li>
+            <li>No seu projeto do Pages, vincule o banco em <strong>Settings &gt; Functions &gt; D1 bindings</strong> (nome: <strong>DB</strong>, banco: <strong>pmoc-db</strong>).</li>
+            <li>Execute o script SQL fornecido na aba Console do D1.</li>
+          </ol>
         </div>
+
+        <div class="pt-2 border-t border-slate-200 space-y-2">
+          <button onclick="syncLocalToCloudflare()" class="w-full py-2 px-3 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 rounded-lg shadow-sm transition-all flex items-center justify-center space-x-1.5">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            <span>Testar / Sincronizar dados locais com Cloudflare D1</span>
+          </button>
+          <button onclick="openModal('sql-modal'); closeModal('settings-modal');" class="w-full py-2 px-3 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg border flex items-center justify-center space-x-1.5">
+            <i data-lucide="code-2" class="w-3.5 h-3.5 text-slate-500"></i>
+            <span>Ver Script SQL Completo do Cloudflare D1</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SCRIPT SQL CLOUDFLARE D1 -->
+  <div id="sql-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs no-print">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-2xl max-h-[92vh] flex flex-col">
+      <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50 rounded-t-2xl">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="code-2" class="w-5 h-5 text-amber-600"></i>
+          <h3 class="text-base font-bold text-slate-900">Script SQL para Cloudflare D1</h3>
+        </div>
+        <button onclick="closeModal('sql-modal')" class="p-1 text-slate-400 hover:text-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <div class="p-4 flex-1 overflow-hidden flex flex-col">
+        <div class="flex justify-between items-center pb-2 text-xs">
+          <span class="font-mono text-slate-500">schema_cloudflare_d1.sql</span>
+          <button onclick="copyD1Sql()" id="btn-copy-d1" class="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded font-semibold text-xs flex items-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span>Copiar Script SQL</span>
+          </button>
+        </div>
+        <div class="flex-1 bg-slate-950 text-slate-200 p-3 rounded-lg overflow-y-auto font-mono text-xs">
+          <pre id="d1-sql-code">CREATE TABLE IF NOT EXISTS pmoc_devices (
+    id TEXT PRIMARY KEY,
+    tag INTEGER UNIQUE NOT NULL,
+    local TEXT NOT NULL,
+    setor TEXT NOT NULL,
+    marca TEXT NOT NULL,
+    modelo TEXT DEFAULT '',
+    btu INTEGER NOT NULL DEFAULT 12000,
+    data_manutencao TEXT,
+    tecnico_executante TEXT DEFAULT 'Guilherme',
+    aprovacao_supervisor TEXT DEFAULT 'Ismael',
+    proxima_manutencao TEXT,
+    observacoes TEXT DEFAULT '',
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS pmoc_maintenance_history (
+    id TEXT PRIMARY KEY,
+    device_tag INTEGER NOT NULL,
+    data_manutencao TEXT NOT NULL,
+    proxima_manutencao TEXT NOT NULL,
+    tecnico_executante TEXT NOT NULL,
+    aprovacao_supervisor TEXT DEFAULT 'Ismael',
+    observacoes TEXT DEFAULT '',
+    checklist TEXT DEFAULT '{}',
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (device_tag) REFERENCES pmoc_devices(tag) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_pmoc_devices_tag ON pmoc_devices(tag);
+CREATE INDEX IF NOT EXISTS idx_pmoc_devices_local ON pmoc_devices(local);
+CREATE INDEX IF NOT EXISTS idx_pmoc_devices_setor ON pmoc_devices(setor);
+CREATE INDEX IF NOT EXISTS idx_pmoc_devices_proxima ON pmoc_devices(proxima_manutencao);
+CREATE INDEX IF NOT EXISTS idx_pmoc_history_tag ON pmoc_maintenance_history(device_tag);</pre>
+        </div>
+      </div>
+      <div class="p-4 border-t border-slate-200 flex justify-end">
+        <button onclick="closeModal('sql-modal')" class="px-4 py-1.5 text-xs font-semibold text-slate-600 bg-slate-100 rounded-lg">Fechar</button>
       </div>
     </div>
   </div>
@@ -668,6 +748,21 @@
         saveDevices();
         closeModal('maintenance-modal');
         renderTable();
+
+        // Envia para o Cloudflare D1 se ativo
+        fetch('/api/maintenance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tag,
+            data_manutencao: dt,
+            proxima_manutencao: dev.proxima_manutencao,
+            tecnico_executante: tech,
+            aprovacao_supervisor: sup,
+            observacoes: obs
+          })
+        }).catch(() => {});
+
         alert(`Manutenção para TAG #${tag} registrada com sucesso!`);
       }
     }
@@ -738,6 +833,13 @@
       populateFilterDropdowns();
       closeModal('device-modal');
       renderTable();
+
+      // Envia para o Cloudflare D1
+      fetch('/api/devices', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tag, local, setor, marca, modelo, btu, observacoes: obs })
+      }).catch(() => {});
     }
 
     function deleteDevice(tag) {
@@ -746,6 +848,9 @@
         saveDevices();
         populateFilterDropdowns();
         renderTable();
+
+        // Remove no Cloudflare D1
+        fetch(`/api/devices?tag=${tag}`, { method: 'DELETE' }).catch(() => {});
       }
     }
 
@@ -816,14 +921,60 @@
       }
     }
 
-    function openReportModal() {
-      window.print();
+    function copyD1Sql() {
+      const code = document.getElementById('d1-sql-code').textContent;
+      navigator.clipboard.writeText(code);
+      const btn = document.getElementById('btn-copy-d1');
+      btn.textContent = 'Copiado!';
+      setTimeout(() => { btn.textContent = 'Copiar Script SQL'; }, 2000);
+    }
+
+    async function checkCloudflareD1Connection() {
+      try {
+        const res = await fetch('/api/devices');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            devices = data.sort((a,b) => a.tag - b.tag);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(devices));
+          }
+          document.getElementById('txt-db-status').textContent = 'Cloudflare D1 Conectado';
+          document.getElementById('dot-db-status').className = 'w-2 h-2 rounded-full bg-emerald-500 animate-pulse';
+          document.getElementById('btn-db-status').className = 'flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100 transition-colors';
+          populateFilterDropdowns();
+          renderTable();
+          return;
+        }
+      } catch (err) {
+        // Modo local
+      }
+      document.getElementById('txt-db-status').textContent = 'Modo Local (D1 Pronto)';
+    }
+
+    async function syncLocalToCloudflare() {
+      try {
+        const res = await fetch('/api/devices', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(devices)
+        });
+        if (res.ok) {
+          alert(`Sucesso! ${devices.length} aparelhos sincronizados com o banco Cloudflare D1!`);
+          checkCloudflareD1Connection();
+        } else {
+          const err = await res.json();
+          alert(`Aviso: ${err.error || 'Verifique se o binding DB está ativo no Cloudflare Pages'}`);
+        }
+      } catch (e) {
+        alert('Não foi possível conectar com /api/devices. Este recurso funciona quando publicado no Cloudflare Pages com a Function e o D1 configurados.');
+      }
     }
 
     // Inicialização
     loadLocalDevices();
     populateFilterDropdowns();
     renderTable();
+    checkCloudflareD1Connection();
   </script>
 </body>
 </html>
