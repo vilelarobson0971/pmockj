@@ -195,6 +195,18 @@
     </div>
   </main>
 
+  <!-- FOOTER COM DIREITOS AUTORAIS -->
+  <footer class="mt-auto py-4 px-4 sm:px-6 lg:px-8 border-t border-slate-200 bg-white text-xs text-slate-500 no-print">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div class="font-medium text-slate-700">
+        Robson Vilela 2026
+      </div>
+      <div class="text-slate-500">
+        PMOC King &amp; Joe • Plano de Manutenção, Operação e Controle
+      </div>
+    </div>
+  </footer>
+
   <!-- MODAL: REGISTRAR MANUTENÇÃO -->
   <div id="maintenance-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs no-print">
     <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-xl max-h-[92vh] overflow-y-auto">
@@ -225,20 +237,19 @@
           <span id="maint-calculated-next" class="font-bold font-mono">--/--/----</span>
         </div>
 
-        <!-- Seleção de Técnico e Supervisor -->
-<div class="grid grid-cols-2 gap-3">
-  <div>
-    <label class="block text-xs font-semibold text-slate-700 mb-1">Técnico Executante *</label>
-    <select id="maint-tech" class="w-full py-2 px-3 border border-slate-300 rounded-lg text-sm">
-      <option value="Guilherme">Guilherme</option>
-      <option value="Ismael">Ismael</option>
-    </select>
-  </div>
-  <div>
-    <label class="block text-xs font-semibold text-slate-700 mb-1">Supervisor</label>
-    <input type="text" id="maint-sup" value="Ismael" class="w-full py-2 px-3 border border-slate-300 bg-slate-50 text-slate-800 rounded-lg text-sm font-semibold" readonly>
-  </div>
-</div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Técnico Executante *</label>
+            <select id="maint-tech" class="w-full py-2 px-3 border border-slate-300 rounded-lg text-sm">
+              <option value="Guilherme">Guilherme</option>
+              <option value="Ismael">Ismael</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Supervisor</label>
+            <input type="text" id="maint-sup" value="Ismael" class="w-full py-2 px-3 border border-slate-300 bg-slate-50 text-slate-800 rounded-lg text-sm font-semibold" readonly>
+          </div>
+        </div>
 
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Observações da Execução</label>
@@ -348,7 +359,7 @@
     const INITIAL_DATA = [
       { tag: 1, local: "Matriz", setor: "Recepção", marca: "Springer", modelo: "42MACA12S5", btu: 12000, data_manutencao: "2026-09-24", tecnico_executante: "Guilherme", aprovacao_supervisor: "Ismael", proxima_manutencao: "2027-03-23", observacoes: "Efetuado limpeza e higienização" },
       { tag: 2, local: "Matriz", setor: "CPD", marca: "Philco", modelo: "Eco Inverter", btu: 12000, data_manutencao: "2026-02-23", tecnico_executante: "Guilherme", aprovacao_supervisor: "Ismael", proxima_manutencao: "2026-08-22", observacoes: "Efetuado limpeza e higienização" },
-      { tag: 3, local: "Matriz", setor: "CPD", marca: "Elgin", modelo: "HWFL18B2IA", btu: 18000, data_manutencao: "2026-01-27", tecnico_executante: "Guilherme", aprovacao_supervisor: "Robson", proxima_manutencao: "2026-07-26", observacoes: "Efetuado limpeza e higienização" },
+      { tag: 3, local: "Matriz", setor: "CPD", marca: "Elgin", modelo: "HWFL18B2IA", btu: 18000, data_manutencao: "2026-01-27", tecnico_executante: "Guilherme", aprovacao_supervisor: "Ismael", proxima_manutencao: "2026-07-26", observacoes: "Efetuado limpeza e higienização" },
       { tag: 4, local: "Matriz", setor: "RH", marca: "Springer", modelo: "42MACB18S5", btu: 18000, data_manutencao: "2026-09-24", tecnico_executante: "Guilherme", aprovacao_supervisor: "Ismael", proxima_manutencao: "2027-03-23", observacoes: "Efetuado limpeza e higienização" },
       { tag: 5, local: "Matriz", setor: "Marketing", marca: "TCL", modelo: "TAC18CSA1", btu: 18000, data_manutencao: "2026-09-24", tecnico_executante: "Guilherme", aprovacao_supervisor: "Ismael", proxima_manutencao: "2027-03-23", observacoes: "Efetuado limpeza e higienização" },
       { tag: 6, local: "Matriz", setor: "Marketing", marca: "TCL", modelo: "TAC18CSA1", btu: 18000, data_manutencao: "2026-07-30", tecnico_executante: "Guilherme", aprovacao_supervisor: "Ismael", proxima_manutencao: "2027-01-26", observacoes: "Efetuado limpeza e higienização" },
@@ -357,14 +368,14 @@
       { tag: 9, local: "Matriz", setor: "Diretoria - Rafael", marca: "Springer", modelo: "42AFFCL12", btu: 12000, data_manutencao: "2026-09-25", tecnico_executante: "Guilherme", aprovacao_supervisor: "Ismael", proxima_manutencao: "2027-03-24", observacoes: "Efetuado limpeza e higienização" },
       { tag: 10, local: "Matriz", setor: "Controladoria", marca: "Springer", modelo: "42MACB18S5", btu: 18000, data_manutencao: "2026-09-25", tecnico_executante: "Guilherme", aprovacao_supervisor: "Ismael", proxima_manutencao: "2027-03-24", observacoes: "Efetuado limpeza e higienização" },
       { tag: 11, local: "Matriz", setor: "Diretoria - Jair", marca: "COMFEE", modelo: "42AFCE12X5", btu: 12000, data_manutencao: "2026-09-25", tecnico_executante: "Guilherme", aprovacao_supervisor: "Ismael", proxima_manutencao: "2027-03-24", observacoes: "Feito limpeza e higienização" },
-      { tag: 12, local: "Matriz", setor: "Sala reunião térreo", marca: "COMFEE", modelo: "42AFCD18F5", btu: 18000, data_manutencao: "2026-01-27", tecnico_executante: "Guilherme", aprovacao_supervisor: "Robson", proxima_manutencao: "2026-07-26", observacoes: "Feito limpeza e higienização" },
+      { tag: 12, local: "Matriz", setor: "Sala reunião térreo", marca: "COMFEE", modelo: "42AFCD18F5", btu: 18000, data_manutencao: "2026-01-27", tecnico_executante: "Guilherme", aprovacao_supervisor: "Ismael", proxima_manutencao: "2026-07-26", observacoes: "Feito limpeza e higienização" },
       { tag: 13, local: "Matriz", setor: "Financeiro", marca: "Springer", modelo: "42MACB18S5", btu: 18000, data_manutencao: "2026-09-25", tecnico_executante: "Guilherme", aprovacao_supervisor: "Ismael", proxima_manutencao: "2027-03-24", observacoes: "Efetuado limpeza e higienização" },
       { tag: 14, local: "Matriz", setor: "Diretoria", marca: "Springer", modelo: "42TFCA", btu: 12000, data_manutencao: "2026-09-25", tecnico_executante: "Guilherme", aprovacao_supervisor: "Ismael", proxima_manutencao: "2027-03-24", observacoes: "Feito limpeza e higienização" },
-      { tag: 15, local: "Matriz", setor: "Sala reunião principal", marca: "Springer", modelo: "42MACB18S5", btu: 18000, data_manutencao: "2026-01-27", tecnico_executante: "Guilherme", aprovacao_supervisor: "Robson", proxima_manutencao: "2026-07-26", observacoes: "Feito limpeza e higienização" },
-      { tag: 16, local: "Matriz", setor: "Sala reunião principal", marca: "Springer", modelo: "42MACB18S5", btu: 18000, data_manutencao: "2026-01-27", tecnico_executante: "Guilherme", aprovacao_supervisor: "Robson", proxima_manutencao: "2026-07-26", observacoes: "Feito limpeza e higienização" },
+      { tag: 15, local: "Matriz", setor: "Sala reunião principal", marca: "Springer", modelo: "42MACB18S5", btu: 18000, data_manutencao: "2026-01-27", tecnico_executante: "Guilherme", aprovacao_supervisor: "Ismael", proxima_manutencao: "2026-07-26", observacoes: "Feito limpeza e higienização" },
+      { tag: 16, local: "Matriz", setor: "Sala reunião principal", marca: "Springer", modelo: "42MACB18S5", btu: 18000, data_manutencao: "2026-01-27", tecnico_executante: "Guilherme", aprovacao_supervisor: "Ismael", proxima_manutencao: "2026-07-26", observacoes: "Feito limpeza e higienização" },
       { tag: 17, local: "Matriz", setor: "Expedição - Recepção", marca: "Philco", modelo: "Eco Inverter", btu: 18000, data_manutencao: "2026-09-25", tecnico_executante: "Guilherme", aprovacao_supervisor: "Ismael", proxima_manutencao: "2027-03-24", observacoes: "Efetuado limpeza e higienização" },
       { tag: 18, local: "Matriz", setor: "Expedição - Sala Welder", marca: "Agratto", modelo: "ACST12FR4-02", btu: 12000, data_manutencao: "2026-09-25", tecnico_executante: "Guilherme", aprovacao_supervisor: "Ismael", proxima_manutencao: "2027-03-24", observacoes: "Efetuado Limpeza e higienização" },
-      { tag: 19, local: "Filial", setor: "Sala de Reunião - Filial 01", marca: "COMFEE", modelo: "42AFCD12F5", btu: 12000, data_manutencao: "2026-01-27", tecnico_executante: "Guilherme", aprovacao_supervisor: "Guilherme", proxima_manutencao: "2026-07-26", observacoes: "Feito Limpeza E Higienização" },
+      { tag: 19, local: "Filial", setor: "Sala de Reunião - Filial 01", marca: "COMFEE", modelo: "42AFCD12F5", btu: 12000, data_manutencao: "2026-01-27", tecnico_executante: "Guilherme", aprovacao_supervisor: "Ismael", proxima_manutencao: "2026-07-26", observacoes: "Feito Limpeza E Higienização" },
       { tag: 20, local: "Matriz", setor: "Estoque - Sala Umberto", marca: "GREE", modelo: "GWC12QC-D3NNB4D/I", btu: 12000, data_manutencao: "2026-09-25", tecnico_executante: "Guilherme", aprovacao_supervisor: "Ismael", proxima_manutencao: "2027-03-24", observacoes: "Feito limpeza e higienização" },
       { tag: 21, local: "Matriz", setor: "Laboratório - Sala ADM", marca: "GREE", modelo: "GWC18AAD-D3NNA1D/I", btu: 18000, data_manutencao: "2026-09-25", tecnico_executante: "Guilherme", aprovacao_supervisor: "Ismael", proxima_manutencao: "2027-03-24", observacoes: "efetuado limpeza e higienização" },
       { tag: 22, local: "Matriz", setor: "Laboratório - Sala ADM", marca: "GREE", modelo: "GWC18AAD-D3NNA1D/I", btu: 18000, data_manutencao: "2026-09-25", tecnico_executante: "Guilherme", aprovacao_supervisor: "Ismael", proxima_manutencao: "2027-03-24", observacoes: "efetuado limpeza e higienização" },
@@ -399,15 +410,36 @@
     ];
 
     let devices = [];
-    const STORAGE_KEY = 'pmoc_king_joe_devices_v1';
+    const STORAGE_KEY = 'pmoc_king_joe_devices_v4';
 
     function loadLocalDevices() {
+      // Limpeza de cache antigo para garantir que nenhum resquício permaneça
+      localStorage.removeItem('pmoc_king_joe_devices_v1');
+      localStorage.removeItem('pmoc_king_joe_devices_v2');
+      localStorage.removeItem('pmoc_king_joe_devices_v3');
+      localStorage.removeItem('akr_pmoc_devices_v1');
+
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) {
-        devices = [...INITIAL_DATA];
+        devices = INITIAL_DATA.map(d => ({
+          ...d,
+          aprovacao_supervisor: 'Ismael',
+          tecnico_executante: d.tecnico_executante === 'Robson' ? 'Guilherme' : (d.tecnico_executante || 'Guilherme')
+        }));
         localStorage.setItem(STORAGE_KEY, JSON.stringify(devices));
       } else {
-        try { devices = JSON.parse(raw); } catch (e) { devices = [...INITIAL_DATA]; }
+        try {
+          devices = JSON.parse(raw);
+          // Higienização forçada de qualquer valor salvo
+          devices = devices.map(d => ({
+            ...d,
+            aprovacao_supervisor: 'Ismael',
+            tecnico_executante: d.tecnico_executante === 'Robson' ? 'Guilherme' : (d.tecnico_executante || 'Guilherme')
+          }));
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(devices));
+        } catch (e) {
+          devices = [...INITIAL_DATA];
+        }
       }
     }
 
@@ -530,7 +562,7 @@
               </td>
               <td class="py-3 px-4 text-xs">
                 <div>Téc: <strong>${d.tecnico_executante || 'Guilherme'}</strong></div>
-                <div>Sup: <strong>${d.aprovacao_supervisor || 'Ismael'}</strong></div>
+                <div>Sup: <strong>Ismael</strong></div>
               </td>
               <td class="py-3 px-4 text-center">
                 <div class="flex items-center justify-center space-x-1.5">
@@ -587,8 +619,8 @@
       const now = new Date();
       const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
       document.getElementById('maint-date').value = todayStr;
-      document.getElementById('maint-tech').value = dev.tecnico_executante || 'Guilherme';
-      document.getElementById('maint-sup').value = dev.aprovacao_supervisor || 'Ismael';
+      document.getElementById('maint-tech').value = dev.tecnico_executante === 'Ismael' ? 'Ismael' : 'Guilherme';
+      document.getElementById('maint-sup').value = 'Ismael';
       document.getElementById('maint-obs').value = dev.observacoes || 'Efetuado limpeza e higienização';
       updateMaintNextDate();
       openModal('maintenance-modal');
@@ -608,7 +640,7 @@
       const dt = document.getElementById('maint-date').value;
       const days = document.getElementById('maint-period').value;
       const tech = document.getElementById('maint-tech').value;
-      const sup = document.getElementById('maint-sup').value;
+      const sup = 'Ismael';
       const obs = document.getElementById('maint-obs').value;
 
       const dev = devices.find(d => d.tag === tag);
@@ -687,7 +719,7 @@
       if (isEdit) {
         const idx = devices.findIndex(d => d.tag === tag);
         if (idx >= 0) {
-          devices[idx] = { ...devices[idx], local, setor, marca, modelo, btu, observacoes: obs };
+          devices[idx] = { ...devices[idx], local, setor, marca, modelo, btu, observacoes: obs, aprovacao_supervisor: 'Ismael' };
         }
       } else {
         devices.push({
@@ -728,7 +760,7 @@
       const headers = ['TAG','Local','Setor','Marca','Modelo','BTU','Data Manutenção','Técnico Executante','Aprovação Supervisor','Próxima manutenção','Observações'];
       const rows = devices.map(d => [
         d.tag, `"${d.local}"`, `"${d.setor}"`, `"${d.marca}"`, `"${d.modelo||''}"`, d.btu,
-        `"${isoToBr(d.data_manutencao)}"`, `"${d.tecnico_executante||''}"`, `"${d.aprovacao_supervisor||''}"`,
+        `"${isoToBr(d.data_manutencao)}"`, `"${d.tecnico_executante||'Guilherme'}"`, `"Ismael"`,
         `"${isoToBr(d.proxima_manutencao)}"`, `"${d.observacoes||''}"`
       ]);
       const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
@@ -815,7 +847,7 @@
                   <td class="p-1.5 border-r border-slate-300 text-right font-mono">${Number(d.btu).toLocaleString('pt-BR')}</td>
                   <td class="p-1.5 border-r border-slate-300 text-center font-mono">${isoToBr(d.data_manutencao)}</td>
                   <td class="p-1.5 border-r border-slate-300 text-center font-mono font-bold">${isoToBr(d.proxima_manutencao)}</td>
-                  <td class="p-1.5 border-r border-slate-300 text-2xs">${d.tecnico_executante || 'Guilherme'} / ${d.aprovacao_supervisor || 'Ismael'}</td>
+                  <td class="p-1.5 border-r border-slate-300 text-2xs">${d.tecnico_executante || 'Guilherme'} / Ismael</td>
                   <td class="p-1.5 text-center text-slate-300">__________</td>
                 </tr>
               `;
