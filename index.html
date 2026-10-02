@@ -46,9 +46,15 @@
         </div>
 
         <div class="flex items-center space-x-2 sm:space-x-3">
-          <button onclick="openReportModal()" class="flex items-center space-x-1.5 px-3.5 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 rounded-lg border border-slate-300 shadow-xs transition-colors">
+          <!-- BADGE DE STATUS CLOUDFLARE D1 (INDICADOR VISUAL EM TEMPO REAL) -->
+          <div id="cloud-status-badge" onclick="openCloudHelpModal()" class="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-2xs sm:text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200 cursor-pointer hover:shadow-xs transition-all" title="Clique para detalhes da conexão com o Cloudflare D1">
+            <span id="cloud-status-dot" class="w-2 h-2 rounded-full bg-slate-400 animate-pulse"></span>
+            <span id="cloud-status-text">Verificando Nuvem...</span>
+          </div>
+
+          <button onclick="openReportModal()" class="flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 rounded-lg border border-slate-300 shadow-xs transition-colors">
             <i data-lucide="file-text" class="w-4 h-4 text-slate-600"></i>
-            <span>Relatório PDF</span>
+            <span class="hidden sm:inline">Relatório PDF</span>
           </button>
 
           <button onclick="openDeviceModal()" class="flex items-center space-x-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 rounded-lg shadow-sm transition-all">
@@ -324,6 +330,44 @@
     </div>
   </div>
 
+  <!-- MODAL: INFORMAÇÕES DE STATUS DA NUVEM CLOUDFLARE D1 -->
+  <div id="cloud-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs no-print">
+    <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden">
+      <div class="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div class="flex items-center space-x-2">
+          <i data-lucide="cloud" class="w-5 h-5 text-cyan-600"></i>
+          <h3 class="text-base font-bold text-slate-900">Status do Banco Cloudflare D1</h3>
+        </div>
+        <button onclick="closeModal('cloud-modal')" class="p-1 text-slate-400 hover:text-slate-700"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="p-6 space-y-4 text-xs text-slate-600">
+        <div id="cloud-modal-status-box" class="p-4 rounded-xl border flex items-start space-x-3">
+          <!-- Preenchido dinamicamente via JS -->
+        </div>
+
+        <div class="space-y-2">
+          <h4 class="font-bold text-slate-800 uppercase tracking-wide">Como funciona a sincronização?</h4>
+          <p class="leading-relaxed">
+            • <strong>Quando conectado (Verde):</strong> Toda inclusão, edição e manutenção preventiva é salva diretamente nas tabelas SQL do Cloudflare D1 e sincronizada em tempo real em todos os computadores e celulares.<br>
+            • <strong>Modo Local (Amarelo):</strong> Se o banco D1 ou as funções da Cloudflare ainda não estiverem ativos, o sistema salva os dados com total segurança no navegador deste computador.
+          </p>
+        </div>
+
+        <div class="pt-3 border-t border-slate-200 flex items-center justify-between">
+          <button onclick="checkCloudflareD1Connection(true)" class="flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold text-cyan-700 bg-cyan-50 hover:bg-cyan-100 rounded-lg border border-cyan-200 transition-colors">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            <span>Testar Conexão Agora</span>
+          </button>
+          <button onclick="uploadAllToCloud(true)" id="btn-sync-cloud" class="flex items-center space-x-1.5 px-3 py-2 text-xs font-semibold text-white bg-cyan-600 hover:bg-cyan-700 rounded-lg shadow-sm transition-all">
+            <i data-lucide="upload-cloud" class="w-3.5 h-3.5"></i>
+            <span>Subir Dados para Nuvem</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: RELATÓRIO PDF (PREVIEW & IMPRESSÃO) -->
   <div id="report-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-5 bg-slate-900/70 backdrop-blur-xs no-print">
     <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-5xl max-h-[94vh] flex flex-col">
@@ -410,10 +454,10 @@
     ];
 
     let devices = [];
+    let isCloudConnected = false;
     const STORAGE_KEY = 'pmoc_king_joe_devices_v4';
 
     function loadLocalDevices() {
-      // Limpeza de cache antigo para garantir que nenhum resquício permaneça
       localStorage.removeItem('pmoc_king_joe_devices_v1');
       localStorage.removeItem('pmoc_king_joe_devices_v2');
       localStorage.removeItem('pmoc_king_joe_devices_v3');
@@ -430,7 +474,6 @@
       } else {
         try {
           devices = JSON.parse(raw);
-          // Higienização forçada de qualquer valor salvo
           devices = devices.map(d => ({
             ...d,
             aprovacao_supervisor: 'Ismael',
@@ -634,7 +677,7 @@
       }
     }
 
-    function handleSaveMaintenance(e) {
+    async function handleSaveMaintenance(e) {
       e.preventDefault();
       const tag = Number(document.getElementById('maint-tag').value);
       const dt = document.getElementById('maint-date').value;
@@ -654,20 +697,28 @@
         closeModal('maintenance-modal');
         renderTable();
 
-        fetch('/api/maintenance', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            tag,
-            data_manutencao: dt,
-            proxima_manutencao: dev.proxima_manutencao,
-            tecnico_executante: tech,
-            aprovacao_supervisor: sup,
-            observacoes: obs
-          })
-        }).catch(() => {});
+        let cloudMsg = "Salvo localmente no computador.";
+        try {
+          const res = await fetch('/api/maintenance', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              tag,
+              data_manutencao: dt,
+              proxima_manutencao: dev.proxima_manutencao,
+              tecnico_executante: tech,
+              aprovacao_supervisor: sup,
+              observacoes: obs
+            })
+          });
+          if (res.ok) {
+            cloudMsg = "Salvo com sucesso no Banco Cloudflare D1!";
+            isCloudConnected = true;
+            updateCloudBadgeUI(true);
+          }
+        } catch (err) {}
 
-        alert(`Manutenção para TAG #${tag} registrada com sucesso!`);
+        alert(`✓ Manutenção da TAG #${tag} registrada com sucesso!\n(${cloudMsg})`);
       }
     }
 
@@ -700,7 +751,7 @@
       openModal('device-modal');
     }
 
-    function handleSaveDevice(e) {
+    async function handleSaveDevice(e) {
       e.preventDefault();
       const isEdit = document.getElementById('dev-is-edit').value === '1';
       const tag = Number(document.getElementById('dev-tag').value);
@@ -716,21 +767,26 @@
         return;
       }
 
+      let payload = null;
+
       if (isEdit) {
         const idx = devices.findIndex(d => d.tag === tag);
         if (idx >= 0) {
           devices[idx] = { ...devices[idx], local, setor, marca, modelo, btu, observacoes: obs, aprovacao_supervisor: 'Ismael' };
+          payload = devices[idx];
         }
       } else {
-        devices.push({
+        const newDev = {
           tag, local, setor, marca, modelo, btu,
           data_manutencao: null,
           proxima_manutencao: null,
           tecnico_executante: 'Guilherme',
           aprovacao_supervisor: 'Ismael',
           observacoes: obs
-        });
+        };
+        devices.push(newDev);
         devices.sort((a,b) => a.tag - b.tag);
+        payload = newDev;
       }
 
       saveDevices();
@@ -738,21 +794,29 @@
       closeModal('device-modal');
       renderTable();
 
-      fetch('/api/devices', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tag, local, setor, marca, modelo, btu, observacoes: obs })
-      }).catch(() => {});
+      try {
+        const res = await fetch('/api/devices', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          isCloudConnected = true;
+          updateCloudBadgeUI(true);
+        }
+      } catch (err) {}
     }
 
-    function deleteDevice(tag) {
+    async function deleteDevice(tag) {
       if (confirm(`Excluir aparelho TAG #${tag}?`)) {
         devices = devices.filter(d => d.tag !== tag);
         saveDevices();
         populateFilterDropdowns();
         renderTable();
 
-        fetch(`/api/devices?tag=${tag}`, { method: 'DELETE' }).catch(() => {});
+        try {
+          await fetch(`/api/devices?tag=${tag}`, { method: 'DELETE' });
+        } catch (err) {}
       }
     }
 
@@ -883,19 +947,95 @@
       window.print();
     }
 
-    async function checkCloudflareD1Connection() {
+    // GESTÃO E DIAGNÓSTICO DO CLOUDFLARE D1
+    function updateCloudBadgeUI(connected) {
+      isCloudConnected = connected;
+      const badge = document.getElementById('cloud-status-badge');
+      const dot = document.getElementById('cloud-status-dot');
+      const text = document.getElementById('cloud-status-text');
+
+      if (connected) {
+        badge.className = "flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-2xs sm:text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-300 shadow-xs cursor-pointer hover:bg-emerald-100 transition-colors";
+        dot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+        text.textContent = "Nuvem D1 Conectada";
+        badge.title = "✓ Banco Cloudflare D1 Conectado e Sincronizado!";
+      } else {
+        badge.className = "flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-2xs sm:text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-300 shadow-xs cursor-pointer hover:bg-amber-100 transition-colors";
+        dot.className = "w-2 h-2 rounded-full bg-amber-500";
+        text.textContent = "Modo Local (D1 Pendente)";
+        badge.title = "Clique para ver instruções de conexão com o Cloudflare D1";
+      }
+    }
+
+    async function checkCloudflareD1Connection(showAlert = false) {
       try {
-        const res = await fetch('/api/devices');
+        const res = await fetch('/api/devices', { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
-            devices = data.sort((a,b) => a.tag - b.tag);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(devices));
-            populateFilterDropdowns();
-            renderTable();
+          if (Array.isArray(data)) {
+            updateCloudBadgeUI(true);
+            if (data.length > 0) {
+              devices = data.sort((a,b) => a.tag - b.tag);
+              saveDevices();
+              populateFilterDropdowns();
+              renderTable();
+            } else if (devices.length > 0) {
+              // Se o banco D1 está vazio, sobe os dados automaticamente
+              uploadAllToCloud(false);
+            }
+            if (showAlert) alert("✓ Sucesso! O banco Cloudflare D1 está conectado e respondendo perfeitamente.");
+            return true;
           }
         }
-      } catch (err) {}
+        throw new Error('Endpoint não retornou lista válida.');
+      } catch (err) {
+        updateCloudBadgeUI(false);
+        if (showAlert) alert("Atenção: Não foi possível conectar ao Cloudflare D1.\nO sistema continuará funcionando no Modo Local (salvando neste computador).");
+        return false;
+      }
+    }
+
+    async function uploadAllToCloud(showAlert = true) {
+      try {
+        const res = await fetch('/api/devices', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(devices)
+        });
+        if (res.ok) {
+          updateCloudBadgeUI(true);
+          if (showAlert) alert(`✓ Sucesso! Todos os ${devices.length} aparelhos foram gravados no banco Cloudflare D1 na nuvem!`);
+          return;
+        }
+        throw new Error('Falha ao gravar no Cloudflare D1');
+      } catch (err) {
+        if (showAlert) alert("Não foi possível enviar os dados para a nuvem. Verifique se o binding 'DB' e os arquivos da pasta 'functions/api' estão configurados no Cloudflare Pages.");
+      }
+    }
+
+    function openCloudHelpModal() {
+      const box = document.getElementById('cloud-modal-status-box');
+      if (isCloudConnected) {
+        box.className = "p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-900 flex items-start space-x-3";
+        box.innerHTML = `
+          <div class="w-3 h-3 rounded-full bg-emerald-500 mt-1 shrink-0 animate-pulse"></div>
+          <div>
+            <div class="font-bold text-sm">Nuvem Cloudflare D1 Conectada</div>
+            <div class="mt-1 text-xs text-emerald-800">Seu sistema está 100% conectado ao banco nativo da Cloudflare. Qualquer manutenção ou alteração feita aqui fica salva na nuvem e acessível de qualquer dispositivo.</div>
+          </div>
+        `;
+      } else {
+        box.className = "p-4 rounded-xl border border-amber-200 bg-amber-50 text-amber-900 flex items-start space-x-3";
+        box.innerHTML = `
+          <div class="w-3 h-3 rounded-full bg-amber-500 mt-1 shrink-0"></div>
+          <div>
+            <div class="font-bold text-sm">Modo Local (Banco D1 Pendente)</div>
+            <div class="mt-1 text-xs text-amber-800">O sistema está salvando tudo na memória deste computador. Para ativar a nuvem, certifique-se de vincular a variável <strong>DB</strong> ao banco <strong>pmoc-db</strong> nas configurações do seu Pages na Cloudflare e criar a pasta <strong>functions/api/</strong> no GitHub.</div>
+          </div>
+        `;
+      }
+      openModal('cloud-modal');
+      lucide.createIcons();
     }
 
     // Inicialização
